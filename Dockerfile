@@ -10,7 +10,7 @@ RUN go mod download
 COPY . .
 
 RUN mkdir build
-RUN go build -o build/firestore-go ./firestore-go
+RUN go build -o build/firestore-go ./
 
 
 FROM alpine as runtime

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 
 	firestore "cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -12,14 +13,23 @@ import (
 	"google.golang.org/api/option"
 )
 
-var credentials_file = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+var CREDENTIALS_FILE_PATH = os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 //var client *firestore.Client = connect("./PRIVATE.json")
-var client *firestore.Client = connect(credentials_file)
+var client *firestore.Client = connect()
 
-func connect(pathToCredentialsFile string) *firestore.Client {
-	log.Debug("Database access credentials location: ", credentials_file)
-	sa := option.WithCredentialsFile(pathToCredentialsFile)
+func connect() *firestore.Client {
+	if CREDENTIALS_FILE_PATH == "" {
+		log.Info("trying local credentials file")
+		credentials_file_temp, err := filepath.Abs("./credentials/PRIVATE.json")
+		if err != nil {
+			log.Error("failed to locate file")
+		}
+		CREDENTIALS_FILE_PATH = credentials_file_temp
+		log.Debug("local credentials file: ", CREDENTIALS_FILE_PATH)
+	}
+
+	sa := option.WithCredentialsFile(CREDENTIALS_FILE_PATH)
 	app, err := firebase.NewApp(context.Background(), nil, sa)
 	if err != nil {
 		log.Error("failed to create firebase client app")
